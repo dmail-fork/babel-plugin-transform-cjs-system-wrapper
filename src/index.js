@@ -40,6 +40,7 @@ export default function ({ types: t }) {
     pre() {
       this.usesFilePaths = false;
       this.usesRequireResolve = false;
+      this.parsedDependencies = [];
     },
     visitor: {
       CallExpression(path, { opts = {} }) {
@@ -78,6 +79,8 @@ export default function ({ types: t }) {
             }
 
             args[0].value = requiredModuleName;
+
+            this.parsedDependencies.push(requiredModuleName)
           }
         }
       },
@@ -161,6 +164,9 @@ export default function ({ types: t }) {
           moduleName = moduleName ? t.stringLiteral(moduleName) : null;
 
           let { deps = []} = opts;
+          this.parsedDependencies.forEach((dependency) => {
+            deps.push(dependency);
+          });
           deps = deps.map(d => t.stringLiteral(d));
 
           if (this.usesRequireResolve && !opts.static) {
